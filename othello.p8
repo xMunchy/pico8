@@ -5,7 +5,7 @@ function _init()
    --make pink transparent
 	  palt(0,false)
 	  palt(15,true)
-		mode = "title"
+	  mode = "title"
 
 	  board = {}
 		free = 8*8-4 --open spaces
