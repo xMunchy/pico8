@@ -67,8 +67,8 @@ A game about farming.
 - [ ] Sprites
 - [ ] Map
 - [ ] SFX
-[ ] Music
-[ ] Animation
+- [ ] Music
+- [ ] Animation
 
 ## Pizza Delivery
 A game about delivering pizzas. Still fleshing out concept.
