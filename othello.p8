@@ -76,6 +76,7 @@ function _update60()
 	   end
 		 flip_timer()
 	 elseif mode=="game over" then
+		 flip_timer()
 		 if btnp(5) then
 			 _init()
 		 end
@@ -86,6 +87,7 @@ function _draw()
 	if mode=="title" then
 		cls()
 		print("othello",50,60,7)
+
 	elseif mode == "game" then
 		cls()
 		map(0,0,0,0)
@@ -99,17 +101,12 @@ function _draw()
 			rect((x-1)*16,(y-1)*16,x*16,y*16,8)
 		end
 		spr(side,(x-1)*16,(y-1)*16,2,2)
+
 	elseif mode == "game over" then
 		cls()
 		map(0,0,0,0)
 		--display board
-		for x=1,8 do
-			for y=1,8 do
-				if board[x][y].side then
-					spr(board[x][y].side,(x-1)*16,(y-1)*16,2,2)
-				end
-			end
-		end
+		show_tokens()
 		if winner == 1 then --player 1
 		   sspr(72,16,40,8,20,70,80,16)
 		   sspr(56,0,16,16,32,10,64,64)
@@ -314,6 +311,8 @@ function place_token(d)
    flip_all_tokens(d)
 	 player = (player+1)%2
 	 side = p[player+1]
+	 x = 1
+	 y = 1
 end
 
 function flip_all_tokens(d)
