@@ -9,31 +9,38 @@ function _init()
 
 	  board = {}
 		free = 8*8-4 --open spaces
+		flipping_dur = 0.1 --for cats
+		-- flipping_dur = 0.05 --for tokens
+		flipping_t = 0
 	  for x=1,8 do
 	     board[x] = {}
 	     for y=1,8 do
-	         board[x][y] = null
+	         board[x][y] = {}
+					 board[x][y].flip_prog = 0
+					 board[x][y].is_flipping = false
 	     end
 	  end
 
-   p = {7,9} --sprite id for p1 and p2
+		--transition sprites
+		p1_to_p2 = {160,162,164,166,168,170,172,174} --cats
+		p2_to_p1 = {128,130,132,134,136,138,140,142}
+		-- p1_to_p2 = {64,66,68,70,72,74,76,78} --tokens
+		-- p2_to_p1 = {96,98,100,102,104,106,108,110}
+	 --sprite id for p1 and p2
+	 p = {7,9} --cats
+	 -- p = {3,5} --tokens
    player = flr(rnd(2)) --whose turn? p1 = 0, p2 = 1
    side = p[player+1]
 	 button = {40,39} --sprite id for p1/p2 buttons
-	 p1_to_p2 = {160,162,164,166,168,170,172,174}
-	 p2_to_p1 = {128,130,132,134,136,138,140,142}
-	 flipping = {}
-	 flipping.dur = 0.1
-	 flipping.t = time() + flipping.dur
    --position of curson
    x = 1
    y = 1
 
    --set up board
-   board[4][4] = p[1]
-   board[4][5] = p[2]
-   board[5][4] = p[2]
-   board[5][5] = p[1]
+   board[4][4].side = p[1]
+   board[4][5].side = p[2]
+   board[5][4].side = p[2]
+   board[5][5].side = p[1]
 --   board[6][6] = 5
 --   board[4][6] = 5
 --   board[5][3] = 5
@@ -83,14 +90,7 @@ function _draw()
 		cls()
 		map(0,0,0,0)
 		--display board
-		for i=1,8 do
-			for j=1,8 do
-				if board[i][j] then
-					spr(board[i][j],(i-1)*16,(j-1)*16,2,2)
-				end
-			end
-		end
-		show_flip()
+		show_tokens()
 		--display selection
 		if #get_dir(x,y)>0 then
 			rect((x-1)*16,(y-1)*16,x*16,y*16,11)
@@ -105,8 +105,8 @@ function _draw()
 		--display board
 		for x=1,8 do
 			for y=1,8 do
-				if board[x][y] then
-					spr(board[x][y],(x-1)*16,(y-1)*16,2,2)
+				if board[x][y].side then
+					spr(board[x][y].side,(x-1)*16,(y-1)*16,2,2)
 				end
 			end
 		end
@@ -127,21 +127,21 @@ function get_dir(x,y)
    local found_you = false --adjacent to your token
 	 local directions = {}
    --already occupied
-   if board[x][y] then
+   if board[x][y].side then
       return {}
    end
 
    --check right side
 	 local i = x+1
    while i<9 do
-      if not board[i][y] then --no same colored piece found
+      if not board[i][y].side then --no same colored piece found
          found_me = false
          found_you = false
          break
-      elseif board[i][y]==side then --found me
+      elseif board[i][y].side==side then --found me
          found_me = true
          break
-      elseif board[i][y]!=side then --found you
+      elseif board[i][y].side!=side then --found you
          found_you = true
       end
 			i += 1
@@ -155,14 +155,14 @@ function get_dir(x,y)
    --check left side
    local i = x-1
    while i>0 do
-      if not board[i][y] then --no same colored piece found
+      if not board[i][y].side then --no same colored piece found
          found_me = false
          found_you = false
          break
-      elseif board[i][y]==side then --found me
+      elseif board[i][y].side==side then --found me
          found_me = true
          break
-      elseif board[i][y]!=side then --found you
+      elseif board[i][y].side!=side then --found you
          found_you = true
       end
       i -= 1
@@ -176,14 +176,14 @@ function get_dir(x,y)
    --check down
 	 local i = y+1
    while i<9 do
-      if not board[x][i] then --no same colored piece found
+      if not board[x][i].side then --no same colored piece found
          found_me = false
          found_you = false
          break
-      elseif board[x][i]==side then --found me
+      elseif board[x][i].side==side then --found me
          found_me = true
          break
-      elseif board[x][i]!=side then --found you
+      elseif board[x][i].side!=side then --found you
          found_you = true
       end
 			i += 1
@@ -197,14 +197,14 @@ function get_dir(x,y)
    --check up
    local i = y-1
 	 while i>0 do
-      if not board[x][i] then --no same colored piece found
+      if not board[x][i].side then --no same colored piece found
          found_me = false
          found_you = false
          break
-      elseif board[x][i]==side then --found me
+      elseif board[x][i].side==side then --found me
          found_me = true
          break
-      elseif board[x][i]!=side then --found you
+      elseif board[x][i].side!=side then --found you
          found_you = true
       end
 			i -= 1
@@ -219,14 +219,14 @@ function get_dir(x,y)
    local i = x-1
    local j = y+1
    while i>0 and j<9 do
-      if not board[i][j] then --no same colored piece found
+      if not board[i][j].side then --no same colored piece found
          found_me = false
          found_you = false
          break
-      elseif board[i][j]==side then --found me
+      elseif board[i][j].side==side then --found me
          found_me = true
          break
-      elseif board[i][j]!=side then --found you
+      elseif board[i][j].side!=side then --found you
          found_you = true
       end
       i -= 1
@@ -242,14 +242,14 @@ function get_dir(x,y)
    local i = x+1
    local j = y+1
    while i<9 and j<9 do
-      if not board[i][j] then --no same colored piece found
+      if not board[i][j].side then --no same colored piece found
          found_me = false
          found_you = false
          break
-      elseif board[i][j]==side then --found me
+      elseif board[i][j].side==side then --found me
          found_me = true
          break
-      elseif board[i][j]!=side then --found you
+      elseif board[i][j].side!=side then --found you
          found_you = true
       end
       i += 1
@@ -265,14 +265,14 @@ function get_dir(x,y)
    local i = x-1
    local j = y-1
    while i>0 and j>0 do
-      if not board[i][j] then --no same colored piece found
+      if not board[i][j].side then --no same colored piece found
          found_me = false
          found_you = false
          break
-      elseif board[i][j]==side then --found me
+      elseif board[i][j].side==side then --found me
          found_me = true
          break
-      elseif board[i][j]!=side then --found you
+      elseif board[i][j].side!=side then --found you
          found_you = true
       end
       i -= 1
@@ -288,14 +288,14 @@ function get_dir(x,y)
    local i = x+1
    local j = y-1
    while i<9 and j>0 do
-      if not board[i][j] then --no same colored piece found
+      if not board[i][j].side then --no same colored piece found
          found_me = false
          found_you = false
          break
-      elseif board[i][j]==side then --found me
+      elseif board[i][j].side==side then --found me
          found_me = true
          break
-      elseif board[i][j]!=side then --found you
+      elseif board[i][j].side!=side then --found you
          found_you = true
       end
       i += 1
@@ -310,7 +310,7 @@ end
 
 function place_token(d)
 	free -= 1
-   board[x][y] = side
+   board[x][y].side = side
    flip_all_tokens(d)
 	 player = (player+1)%2
 	 side = p[player+1]
@@ -326,18 +326,12 @@ function flip_all_tokens(d)
 		end
 	end
 	local i = x+1
-	while dir and board[i][y] != side do
-		 local k = #flipping+1
-		 for z=1,#flipping do
- 			if(flipping[z].prog>#p1_to_p2) k=z break
- 		end
-		 flipping[k] = {}
-		 flipping[k].x = i
- 		flipping[k].y = y
-		 flipping[k].prog = 1
-		 flipping[k].change_to = player
-		 board[i][y] = side
-		 i += 1
+	while dir and board[i][y].side != side do
+		board[i][y].is_flipping = true
+		board[i][y].flip_prog = 1
+		board[i][y].change_to = player + 1
+		board[i][y].side = side
+		i += 1
 	end
 
 	--check left side
@@ -349,17 +343,11 @@ function flip_all_tokens(d)
 		end
 	end
 	local i = x-1
-	while dir and board[i][y] != side do
-		local k = #flipping+1
-		for z=1,#flipping do
-			if(flipping[z].prog>#p1_to_p2) k=z break
-		end
-		flipping[k] = {}
-		flipping[k].x = i
-		flipping[k].y = y
-		flipping[k].prog = 1
-		flipping[k].change_to = player
-		board[i][y] = side
+	while dir and board[i][y].side != side do
+		board[i][y].is_flipping = true
+		board[i][y].flip_prog = 1
+		board[i][y].change_to = player + 1
+		board[i][y].side = side
 		 i -= 1
 	end
 
@@ -372,17 +360,11 @@ function flip_all_tokens(d)
 		end
 	end
 	local i = y+1
-	while dir and board[x][i] != side do
-		local k = #flipping+1
-		for z=1,#flipping do
-			if(flipping[z].prog>#p1_to_p2) k=z break
-		end
-		flipping[k] = {}
-		flipping[k].x = x
-		flipping[k].y = i
-		flipping[k].prog = 1
-		flipping[k].change_to = player
-		board[x][i] = side
+	while dir and board[x][i].side != side do
+		board[x][i].is_flipping = true
+		board[x][i].flip_prog = 1
+		board[x][i].change_to = player + 1
+		board[x][i].side = side
 		 i += 1
 	end
 
@@ -395,17 +377,11 @@ function flip_all_tokens(d)
 		end
 	end
 	local i = y-1
-	while dir and board[x][i] != side do
-		local k = #flipping+1
-		for z=1,#flipping do
-			if(flipping[z].prog>#p1_to_p2) k=z break
-		end
-		flipping[k] = {}
-		flipping[k].x = x
-		flipping[k].y = i
-		flipping[k].prog = 1
-		flipping[k].change_to = player
-		board[x][i] = side
+	while dir and board[x][i].side != side do
+		board[x][i].is_flipping = true
+		board[x][i].flip_prog = 1
+		board[x][i].change_to = player + 1
+		board[x][i].side = side
 		 i -= 1
 	end
 
@@ -419,17 +395,11 @@ function flip_all_tokens(d)
 	end
 	local i = x-1
 	local j = y+1
-	while dir and board[i][j] != side do
-		local k = #flipping+1
-		for z=1,#flipping do
-			if(flipping[z].prog>#p1_to_p2) k=z break
-		end
-		flipping[k] = {}
-		flipping[k].x = i
-		flipping[k].y = j
-		flipping[k].prog = 1
-		flipping[k].change_to = player
-		board[i][j] = side
+	while dir and board[i][j].side != side do
+		board[i][j].is_flipping = true
+		board[i][j].flip_prog = 1
+		board[i][j].change_to = player + 1
+		board[i][j].side = side
 		 i -= 1
 		 j += 1
 	end
@@ -444,17 +414,11 @@ function flip_all_tokens(d)
 	end
 	local i = x+1
 	local j = y+1
-	while dir and board[i][j] != side do
-		local k = #flipping+1
-		for z=1,#flipping do
-			if(flipping[z].prog>#p1_to_p2) k=z break
-		end
-		flipping[k] = {}
-		flipping[k].x = i
-		flipping[k].y = j
-		flipping[k].prog = 1
-		flipping[k].change_to = player
-		board[i][j] = side
+	while dir and board[i][j].side != side do
+		board[i][j].is_flipping = true
+		board[i][j].flip_prog = 1
+		board[i][j].change_to = player + 1
+		board[i][j].side = side
 		 i += 1
 		 j += 1
 	end
@@ -469,17 +433,11 @@ function flip_all_tokens(d)
 	end
 	local i = x-1
 	local j = y-1
-	while dir and board[i][j] != side do
-		local k = #flipping+1
-		for z=1,#flipping do
-			if(flipping[z].prog>#p1_to_p2) k=z break
-		end
-		flipping[k] = {}
-		flipping[k].x = i
-		flipping[k].y = j
-		flipping[k].prog = 1
-		flipping[k].change_to = player
-		board[i][j] = side
+	while dir and board[i][j].side != side do
+		board[i][j].is_flipping = true
+		board[i][j].flip_prog = 1
+		board[i][j].change_to = player + 1
+		board[i][j].side = side
 		 i -= 1
 		 j -= 1
 	end
@@ -494,38 +452,44 @@ function flip_all_tokens(d)
 	end
 	local i = x+1
 	local j = y-1
-	while dir and board[i][j] != side do
-		local k = #flipping+1
-		for z=1,#flipping do
-			if(flipping[z].prog>#p1_to_p2) k=z break
-		end
-		flipping[k] = {}
-		flipping[k].x = i
-		flipping[k].y = j
-		flipping[k].prog = 1
-		flipping[k].change_to = player
-		board[i][j] = side
+	while dir and board[i][j].side != side do
+		board[i][j].is_flipping = true
+		board[i][j].flip_prog = 1
+		board[i][j].change_to = player + 1
+		board[i][j].side = side
 		 i += 1
 		 j -= 1
 	end
 end
 
 function flip_timer()
-	if time() >= flipping.t then
-		flipping.t = time() + flipping.dur
-		for i=1,#flipping do
-			flipping[i].prog += 1
+	if time() >= flipping_t then
+		flipping_t = time() + flipping_dur
+		for x=1,8 do
+			for y=1,8 do
+				if board[x][y].is_flipping then
+					board[x][y].flip_prog += 1
+					if board[x][y].flip_prog>#p1_to_p2 then
+						board[x][y].is_flipping = false
+						board[x][y].flip_prog = 0
+					end
+				end
+			end
 		end
 	end
 end
 
-function show_flip()
-	for i=1,#flipping do
-		if flipping[i].prog<=#p1_to_p2 then
-			if flipping[i].change_to == 0 then --player 1
-				spr(p2_to_p1[flipping[i].prog],(flipping[i].x-1)*16,(flipping[i].y-1)*16,2,2)
-			else --player 2
-				spr(p1_to_p2[flipping[i].prog],(flipping[i].x-1)*16,(flipping[i].y-1)*16,2,2)
+function show_tokens()
+	for x=1,8 do
+		for y=1,8 do
+			if board[x][y].is_flipping then --flip
+				if board[x][y].change_to==1 then --player 1
+					spr(p2_to_p1[board[x][y].flip_prog],(x-1)*16,(y-1)*16,2,2)
+				else --player 2
+					spr(p1_to_p2[board[x][y].flip_prog],(x-1)*16,(y-1)*16,2,2)
+				end
+			elseif board[x][y].side then --exists, not flippng
+				spr(board[x][y].side,(x-1)*16,(y-1)*16,2,2)
 			end
 		end
 	end
@@ -569,9 +533,9 @@ function game_over()
 	local p2 = 0
 	for i=1,8 do
 		for j=1,8 do
-			if board[i][j] and board[i][j]==p[1] then
+			if board[i][j].side and board[i][j].side==p[1] then
 				p1 += 1
-			elseif board[i][j] and board[i][j]==p[2] then
+			elseif board[i][j].side and board[i][j].side==p[2] then
 				p2 += 1
 			end
 		end
@@ -619,38 +583,38 @@ __gfx__
 00000000333333333333333333333333333333333333333333333333ffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000
 00000000333333333333333333333333333333333333333333333333ffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000
 00000000333333333333333333333333333333333333333333333333ffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000
-ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000
-ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000
-ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000
-ffffff000007fffffffffff0077fffffffffff077fffffffffffff077ffffffffffffff07fffffff000000000000000000000000000000000000000000000000
-fffff00000007fffffffff000077fffffffff00077fffffffffff00077ffffffffffff0077ffffff000000000000000000000000000000000000000000000000
-ffff0005000007fffffff05000077fffffff0050077fffffffff005007ffffffffffff0077ffffff000000000000000000000000000000000000000000000000
-fff000500000007fffff0500000077fffff005000077ffffffff0500077fffffffffff0077ffffff000000000000000000000000000000000000000000000000
-fff000000000007fffff0000000077fffff000000077ffffffff0000077fffffffffff0077ffffff000000000000000000000000000000000000000000000000
-fff000000000007fffff0000000077fffff000000077ffffffff0000077fffffffffff0077ffffff000000000000000000000000000000000000000000000000
-fff000000000007fffff0000000077fffff000000077ffffffff0000077fffffffffff0077ffffff000000000000000000000000000000000000000000000000
-ffff00000000077ffffff000000777fffff000000077ffffffff0000077fffffffffff0077ffffff000000000000000000000000000000000000000000000000
-fffff000000077ffffffff0000777fffffff0000077fffffffff0000077fffffffffff0077ffffff000000000000000000000000000000000000000000000000
-ffffff0000077ffffffffff00777fffffffff00077fffffffffff00077ffffffffffff0077ffffff000000000000000000000000000000000000000000000000
-fffffff77777ffffffffffff777fffffffffff077fffffffffffff077ffffffffffffff07fffffff000000000000000000000000000000000000000000000000
-ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000
-ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000
-ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000
-ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000
-ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000
-ffffff777770fffffffffff7700fffffffffff700fffffffffffff700ffffffffffffff70fffffff000000000000000000000000000000000000000000000000
-fffff77777770fffffffff777700fffffffff77700fffffffffff77700ffffffffffff7700ffffff000000000000000000000000000000000000000000000000
-ffff7776777770fffffff76777700fffffff7767700fffffffff776770ffffffffffff7700ffffff000000000000000000000000000000000000000000000000
-fff777677777770fffff7677777700fffff776777700ffffffff7677700fffffffffff7700ffffff000000000000000000000000000000000000000000000000
-fff777777777770fffff7777777700fffff777777700ffffffff7777700fffffffffff7700ffffff000000000000000000000000000000000000000000000000
-fff777777777770fffff7777777700fffff777777700ffffffff7777700fffffffffff7700ffffff000000000000000000000000000000000000000000000000
-fff777777777770fffff7777777700fffff777777700ffffffff7777700fffffffffff7700ffffff000000000000000000000000000000000000000000000000
-ffff77777777700ffffff777777000fffff777777700ffffffff7777700fffffffffff7700ffffff000000000000000000000000000000000000000000000000
-fffff777777700ffffffff7777000fffffff7777700fffffffff7777700fffffffffff7700ffffff000000000000000000000000000000000000000000000000
-ffffff7777700ffffffffff77000fffffffff77700fffffffffff77700ffffffffffff7700ffffff000000000000000000000000000000000000000000000000
-fffffff00000ffffffffffff000fffffffffff700fffffffffffff700ffffffffffffff70fffffff000000000000000000000000000000000000000000000000
-ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000
-ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000
+fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff07fffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffffffffffffffffffffffffff077fffffffffffff0077ffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffffffffff077ffffffffffff00077ffffffffffff0077fffffffffffff007fffffffffffff007ffffffffffffffffffffff
+ffffff000007fffffffffff0077ffffffffff00077ffffffffff005007ffffffffffff0077ffffffffffff00777fffffffffff00777ffffffffff0077fffffff
+fffff00000007fffffffff000077ffffffff0050077fffffffff0500077fffffffffff0077ffffffffffff077677fffffffff0077677ffffffff007777ffffff
+ffff0005000007fffffff05000077ffffff005000077ffffffff0000077fffffffffff0077fffffffffff0077767ffffffff007777677ffffff00777767fffff
+fff000500000007fffff0500000077fffff000000077ffffffff0000077fffffffffff0077fffffffffff0077777ffffffff007777777fffff0077777767ffff
+fff000000000007fffff0000000077fffff000000077ffffffff0000077fffffffffff0077fffffffffff0077777ffffffff007777777fffff0077777777ffff
+fff000000000007fffff0000000077fffff000000077ffffffff0000077fffffffffff0077fffffffffff0077777ffffffff007777777fffff0077777777ffff
+fff000000000007fffff0000000077fffff000000077ffffffff0000077fffffffffff0077fffffffffff0077777ffffffff007777777fffff0077777777ffff
+ffff00000000077ffffff000000777ffffff0000077ffffffffff00077fffffffffffff07ffffffffffff0077777fffffffff0077777ffffff000777777fffff
+fffff000000077ffffffff0000777ffffffff00077ffffffffffff077fffffffffffffffffffffffffffff00777fffffffffff00777ffffffff0007777ffffff
+ffffff0000077ffffffffff00777ffffffffff077ffffffffffffffffffffffffffffffffffffffffffffff007fffffffffffff007ffffffffff00077fffffff
+fffffff77777ffffffffffff777ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000ffffffff
+ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff70fffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffffffffffffffffffffffffff700fffffffffffff7700fffffffffffff770ffffffffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffffffffff700ffffffffffff77700ffffffffffff7700ffffffffffff77000ffffffffffff770ffffffffffffffffffffff
+ffffff777770fffffffffff7700ffffffffff77700ffffffffff776770ffffffffffff7700ffffffffffff700500ffffffffff77000ffffffffff7700fffffff
+fffff77777770fffffffff777700ffffffff7767700fffffffff7677700fffffffffff7700fffffffffff7700050fffffffff7700500ffffffff770000ffffff
+ffff7776777770fffffff76777700ffffff776777700ffffffff7777700fffffffffff7700fffffffffff7700000ffffffff770000500ffffff77000050fffff
+fff777677777770fffff7677777700fffff777777700ffffffff7777700fffffffffff7700fffffffffff7700000ffffffff770000000fffff7700000050ffff
+fff777777777770fffff7777777700fffff777777700ffffffff7777700fffffffffff7700fffffffffff7700000ffffffff770000000fffff7700000000ffff
+fff777777777770fffff7777777700fffff777777700ffffffff7777700fffffffffff7700fffffffffff7700000ffffffff770000000fffff7700000000ffff
+fff777777777770fffff7777777700fffff777777700ffffffff7777700fffffffffff7700fffffffffff7700000ffffffff770000000fffff7700000000ffff
+ffff77777777700ffffff777777000ffffff7777700ffffffffff77700fffffffffffff70fffffffffffff77000ffffffffff7700000ffffff777000000fffff
+fffff777777700ffffffff7777000ffffffff77700ffffffffffff700ffffffffffffffffffffffffffffff770ffffffffffff77000ffffffff7770000ffffff
+ffffff7777700ffffffffff77000ffffffffff700ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff770ffffffffff77700fffffff
+fffffff00000ffffffffffff000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff777ffffffff
+ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
