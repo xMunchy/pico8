@@ -7,9 +7,10 @@ function _init()
 	palt(15,true)
 	mode = "title"
 	vs_com = false
-	maxi = 0
-	x1 = 0
-	y1 = 0
+  vs_timer = time()
+	vs_max = 0
+	vs_x = 0
+	vs_y = 0
 
 	board = {}
 	free = 8*8-4 --open spaces
@@ -105,24 +106,36 @@ function _update60()
 				end
 			end
 		elseif vs_com and player==1 then
-			maxi = 0
-			for a=1,8 do
-				for b=1,8 do
-					x = a
-					y = b
-					dir = get_dir(x,y)
-					local count = computer_max_flips(dir)
-					if maxi<count then
-						x1 = x
-						y1 = y
-						maxi = count
+			if vs_max==0 then
+				for a=1,8 do
+					for b=1,8 do
+						x = a
+						y = b
+						dir = get_dir(x,y)
+						local count = computer_max_flips(dir)
+						if vs_max<count then
+							vs_x = x
+							vs_y = y
+							vs_max = count
+						end
+					end --end for a
+				end --end for b
+				x = 1
+				y = 1
+			else --max already found
+				if time()-vs_timer >= 0.5 then
+					vs_timer = time()
+					if x < vs_x then
+						x += 1
+					elseif y < vs_y then
+						y += 1
+					else --found right spot
+						dir = get_dir(x,y)
+						place_token(dir)
+						vs_max = 0
 					end
 				end
 			end
-			x = x1
-			y = y1
-			dir = get_dir(x,y)
-			place_token(dir)
 		end
 		flip_timer()
 		if game_is_over() then
@@ -144,6 +157,7 @@ function _draw()
 	elseif mode == "game" then
 		cls()
 		map(0,0,0,0)
+		print(vs_timer,0,120,7)
 		--display board
 		show_tokens()
 		--display selection
@@ -161,10 +175,10 @@ function _draw()
 		--display board
 		show_tokens()
 		if winner == 1 then --player 1
-			sspr(72,16,40,8,20,70,80,16)
+			sspr(72,16,40,8,24,70,80,16) --winner text
 			sspr(56,0,16,16,32,10,64,64)
 		elseif winner == 2 then --player 2
-			sspr(72,16,40,8,20,70,80,16)
+			sspr(72,16,40,8,24,70,80,16) --winner text
 			sspr(72,0,16,16,32,10,64,64)
 		else --tie
 			sspr(88,0,16,16,32,40,64,64)
