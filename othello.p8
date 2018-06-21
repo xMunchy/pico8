@@ -6,6 +6,7 @@ function _init()
 	palt(0,false)
 	palt(15,true)
 	mode = "title"
+	select = 1
 	vs_com = false
   vs_timer = time()
 	vs_max = 0
@@ -54,13 +55,20 @@ end
 
 function _update60()
 	if mode=="title" then
+		if btnp(2) or btnp(3) then
+			if select==1 then
+				select = 2
+			else
+				select = 1
+			end
+		end
 		if btnp(5) then
 			mode = "game"
-		elseif btnp(4) then
-			mode = "game"
-			vs_com = true
-			player = 0
-			side = p[1]
+			if select==1 then --play vs com
+				vs_com = true
+				player = 0
+				side = p[1]
+			end
 		end
 	elseif mode=="game" then
 		if not vs_com or player==0 then
@@ -153,11 +161,17 @@ function _draw()
 	if mode=="title" then
 		cls()
 		print("othello",50,60,7)
+		if select==1 then
+			print("play alone",50,90,7)
+			print("play with a friend",50,100,5)
+		else
+			print("play alone",50,90,5)
+			print("play with a friend",50,100,7)
+		end
 
 	elseif mode == "game" then
 		cls()
 		map(0,0,0,0)
-		print(vs_timer,0,120,7)
 		--display board
 		show_tokens()
 		--display selection
