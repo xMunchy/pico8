@@ -2,108 +2,138 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 function _init()
-   --make pink transparent
-	  palt(0,false)
-	  palt(15,true)
-	  mode = "title"
+	--make pink transparent
+	palt(0,false)
+	palt(15,true)
+	mode = "title"
+	vs_com = false
+	maxi = 0
+	x1 = 0
+	y1 = 0
 
-	  board = {}
-		free = 8*8-4 --open spaces
-		flipping_dur = 0.1 --for cats
-		-- flipping_dur = 0.05 --for tokens
-		flipping_t = 0
-	  for x=1,8 do
-	     board[x] = {}
-	     for y=1,8 do
-	         board[x][y] = {}
-					 board[x][y].flip_prog = 0
-					 board[x][y].is_flipping = false
-	     end
-	  end
+	board = {}
+	free = 8*8-4 --open spaces
+	flipping_dur = 0.1 --for cats
+	-- flipping_dur = 0.05 --for tokens
+	flipping_t = 0
+	for x=1,8 do
+		board[x] = {}
+		for y=1,8 do
+			board[x][y] = {}
+			board[x][y].flip_prog = 0
+			board[x][y].is_flipping = false
+		end
+	end
 
-		--transition sprites
-		p1_to_p2 = {160,162,164,166,168,170,172,174} --cats
-		p2_to_p1 = {128,130,132,134,136,138,140,142}
-		-- p1_to_p2 = {64,66,68,70,72,74,76,78} --tokens
-		-- p2_to_p1 = {96,98,100,102,104,106,108,110}
-	 --sprite id for p1 and p2
-	 p = {7,9} --cats
-	 -- p = {3,5} --tokens
-   player = flr(rnd(2)) --whose turn? p1 = 0, p2 = 1
-   side = p[player+1]
-	 button = {40,39} --sprite id for p1/p2 buttons
-   --position of curson
-   x = 1
-   y = 1
+	--transition sprites
+	p1_to_p2 = {160,162,164,166,168,170,172,174} --cats
+	p2_to_p1 = {128,130,132,134,136,138,140,142}
+	-- p1_to_p2 = {64,66,68,70,72,74,76,78} --tokens
+	-- p2_to_p1 = {96,98,100,102,104,106,108,110}
+	--sprite id for p1 and p2
+	p = {7,9} --cats
+	-- p = {3,5} --tokens
+	player = flr(rnd(2)) --whose turn? p1 = 0, p2 = 1
+	side = p[player+1]
+	button = {40,39} --sprite id for p1/p2 buttons
+	--position of curson
+	x = 1
+	y = 1
 
-   --set up board
-   board[4][4].side = p[1]
-   board[4][5].side = p[2]
-   board[5][4].side = p[2]
-   board[5][5].side = p[1]
---   board[6][6] = 5
---   board[4][6] = 5
---   board[5][3] = 5
---   board[3][3] = 5
+	--set up board
+	board[4][4].side = p[1]
+	board[4][5].side = p[2]
+	board[5][4].side = p[2]
+	board[5][5].side = p[1]
+	--   board[6][6] = 5
+	--   board[4][6] = 5
+	--   board[5][3] = 5
+	--   board[3][3] = 5
 end
 
 function _update60()
 	if mode=="title" then
 		if btnp(5) then
 			mode = "game"
+		elseif btnp(4) then
+			mode = "game"
+			vs_com = true
+			player = 0
+			side = p[1]
 		end
 	elseif mode=="game" then
-	   if btnp(0) then --left
-	      if x>1 then
-	         x -= 1
-	         sfx(2)
-	      else
-	         sfx(3)
-	      end
-	         
-	   end
-	   if btnp(1) then --right
-	      if x<8 then
-	         x += 1
-	         sfx(2)
-	      else
-	         sfx(3)
-	      end
-	   end
-	   if btnp(2) then --up
-	      if y>1 then
-	         y -= 1
-	         sfx(2)
-	      else
-	         sfx(3)
-	      end
-	   end
-	   if btnp(3) then --down
-	      if y<8 then
-	         y += 1
-	         sfx(2)
-	      else
-	         sfx(3)
-	      end
-	   end
-	   if btnp(5) then --place token
-			    dir = get_dir(x,y)
-				   if #dir > 0 then
-	         place_token(dir)
-						    if game_is_over() then
-							      game_over()
-						    end
-	      else
-	         sfx(1)
-	      end
-	   end
-		 flip_timer()
-	 elseif mode=="game over" then
-		 flip_timer()
-		 if btnp(5) then
-			 _init()
-		 end
-	 end
+		if not vs_com or player==0 then
+			if btnp(0) then --left
+				if x>1 then
+					x -= 1
+					sfx(2)
+				else
+					sfx(3)
+				end
+
+			end
+			if btnp(1) then --right
+				if x<8 then
+					x += 1
+					sfx(2)
+				else
+					sfx(3)
+				end
+			end
+			if btnp(2) then --up
+				if y>1 then
+					y -= 1
+					sfx(2)
+				else
+					sfx(3)
+				end
+			end
+			if btnp(3) then --down
+				if y<8 then
+					y += 1
+					sfx(2)
+				else
+					sfx(3)
+				end
+			end
+			if btnp(5) then --place token
+				dir = get_dir(x,y)
+				if #dir > 0 then
+					place_token(dir)
+				else
+					sfx(1)
+				end
+			end
+		elseif vs_com and player==1 then
+			maxi = 0
+			for a=1,8 do
+				for b=1,8 do
+					x = a
+					y = b
+					dir = get_dir(x,y)
+					local count = computer_max_flips(dir)
+					if maxi<count then
+						x1 = x
+						y1 = y
+						maxi = count
+					end
+				end
+			end
+			x = x1
+			y = y1
+			dir = get_dir(x,y)
+			place_token(dir)
+		end
+		flip_timer()
+		if game_is_over() then
+			game_over()
+		end
+	elseif mode=="game over" then
+		flip_timer()
+		if btnp(5) then
+			_init()
+		end
+	end
 end
 
 function _draw()
@@ -131,212 +161,212 @@ function _draw()
 		--display board
 		show_tokens()
 		if winner == 1 then --player 1
-		   sspr(72,16,40,8,20,70,80,16)
-		   sspr(56,0,16,16,32,10,64,64)
+			sspr(72,16,40,8,20,70,80,16)
+			sspr(56,0,16,16,32,10,64,64)
 		elseif winner == 2 then --player 2
-		   sspr(72,16,40,8,20,70,80,16)
-		   sspr(72,0,16,16,32,10,64,64)
+			sspr(72,16,40,8,20,70,80,16)
+			sspr(72,0,16,16,32,10,64,64)
 		else --tie
-		   sspr(88,0,16,16,32,40,64,64)
+			sspr(88,0,16,16,32,40,64,64)
 		end
 	end
 end
 
 function get_dir(x,y)
-   local found_me = false --adjacent to my token
-   local found_you = false --adjacent to your token
-	 local directions = {}
-   --already occupied
-   if board[x][y].side then
-      return {}
-   end
+	local found_me = false --adjacent to my token
+	local found_you = false --adjacent to your token
+	local directions = {}
+	--already occupied
+	if board[x][y].side then
+		return {}
+	end
 
-   --check right side
-	 local i = x+1
-   while i<9 do
-      if not board[i][y].side then --no same colored piece found
-         found_me = false
-         found_you = false
-         break
-      elseif board[i][y].side==side then --found me
-         found_me = true
-         break
-      elseif board[i][y].side!=side then --found you
-         found_you = true
-      end
-			i += 1
-   end
-   if found_me and found_you then
-      directions[#directions+1] = "r"
+	--check right side
+	local i = x+1
+	while i<9 do
+		if not board[i][y].side then --no same colored piece found
+			found_me = false
+			found_you = false
+			break
+		elseif board[i][y].side==side then --found me
+			found_me = true
+			break
+		elseif board[i][y].side!=side then --found you
+			found_you = true
 		end
-      found_me = false
-      found_you = false
+		i += 1
+	end
+	if found_me and found_you then
+		directions[#directions+1] = "r"
+	end
+	found_me = false
+	found_you = false
 
-   --check left side
-   local i = x-1
-   while i>0 do
-      if not board[i][y].side then --no same colored piece found
-         found_me = false
-         found_you = false
-         break
-      elseif board[i][y].side==side then --found me
-         found_me = true
-         break
-      elseif board[i][y].side!=side then --found you
-         found_you = true
-      end
-      i -= 1
-   end
-   if found_me and found_you then
-      directions[#directions+1] = "l"
+	--check left side
+	local i = x-1
+	while i>0 do
+		if not board[i][y].side then --no same colored piece found
+			found_me = false
+			found_you = false
+			break
+		elseif board[i][y].side==side then --found me
+			found_me = true
+			break
+		elseif board[i][y].side!=side then --found you
+			found_you = true
 		end
-      found_me = false
-      found_you = false
+		i -= 1
+	end
+	if found_me and found_you then
+		directions[#directions+1] = "l"
+	end
+	found_me = false
+	found_you = false
 
-   --check down
-	 local i = y+1
-   while i<9 do
-      if not board[x][i].side then --no same colored piece found
-         found_me = false
-         found_you = false
-         break
-      elseif board[x][i].side==side then --found me
-         found_me = true
-         break
-      elseif board[x][i].side!=side then --found you
-         found_you = true
-      end
-			i += 1
-   end
-   if found_me and found_you then
-      directions[#directions+1] = "d"
+	--check down
+	local i = y+1
+	while i<9 do
+		if not board[x][i].side then --no same colored piece found
+			found_me = false
+			found_you = false
+			break
+		elseif board[x][i].side==side then --found me
+			found_me = true
+			break
+		elseif board[x][i].side!=side then --found you
+			found_you = true
 		end
-		found_me = false
-		found_you = false
+		i += 1
+	end
+	if found_me and found_you then
+		directions[#directions+1] = "d"
+	end
+	found_me = false
+	found_you = false
 
-   --check up
-   local i = y-1
-	 while i>0 do
-      if not board[x][i].side then --no same colored piece found
-         found_me = false
-         found_you = false
-         break
-      elseif board[x][i].side==side then --found me
-         found_me = true
-         break
-      elseif board[x][i].side!=side then --found you
-         found_you = true
-      end
-			i -= 1
-   end
-   if found_me and found_you then
-      directions[#directions+1] = "u"
+	--check up
+	local i = y-1
+	while i>0 do
+		if not board[x][i].side then --no same colored piece found
+			found_me = false
+			found_you = false
+			break
+		elseif board[x][i].side==side then --found me
+			found_me = true
+			break
+		elseif board[x][i].side!=side then --found you
+			found_you = true
 		end
-      found_me = false
-      found_you = false
+		i -= 1
+	end
+	if found_me and found_you then
+		directions[#directions+1] = "u"
+	end
+	found_me = false
+	found_you = false
 
-   --check left/down diagonal
-   local i = x-1
-   local j = y+1
-   while i>0 and j<9 do
-      if not board[i][j].side then --no same colored piece found
-         found_me = false
-         found_you = false
-         break
-      elseif board[i][j].side==side then --found me
-         found_me = true
-         break
-      elseif board[i][j].side!=side then --found you
-         found_you = true
-      end
-      i -= 1
-      j += 1
-   end
-   if found_me and found_you then
-      directions[#directions+1] = "ld"
-   end
-	 found_me = false
-	 found_you = false
-
-   --check right/down diagonal
-   local i = x+1
-   local j = y+1
-   while i<9 and j<9 do
-      if not board[i][j].side then --no same colored piece found
-         found_me = false
-         found_you = false
-         break
-      elseif board[i][j].side==side then --found me
-         found_me = true
-         break
-      elseif board[i][j].side!=side then --found you
-         found_you = true
-      end
-      i += 1
-      j += 1
-   end
-   if found_me and found_you then
-      directions[#directions+1] = "rd"
-   end
-    found_me = false
-    found_you = false
-
-   --check left/up diagonal
-   local i = x-1
-   local j = y-1
-   while i>0 and j>0 do
-      if not board[i][j].side then --no same colored piece found
-         found_me = false
-         found_you = false
-         break
-      elseif board[i][j].side==side then --found me
-         found_me = true
-         break
-      elseif board[i][j].side!=side then --found you
-         found_you = true
-      end
-      i -= 1
-      j -= 1
-   end
-   if found_me and found_you then
-      directions[#directions+1] = "lu"
+	--check left/down diagonal
+	local i = x-1
+	local j = y+1
+	while i>0 and j<9 do
+		if not board[i][j].side then --no same colored piece found
+			found_me = false
+			found_you = false
+			break
+		elseif board[i][j].side==side then --found me
+			found_me = true
+			break
+		elseif board[i][j].side!=side then --found you
+			found_you = true
 		end
-      found_me = false
-      found_you = false
+		i -= 1
+		j += 1
+	end
+	if found_me and found_you then
+		directions[#directions+1] = "ld"
+	end
+	found_me = false
+	found_you = false
 
-   --check right/up diagonal
-   local i = x+1
-   local j = y-1
-   while i<9 and j>0 do
-      if not board[i][j].side then --no same colored piece found
-         found_me = false
-         found_you = false
-         break
-      elseif board[i][j].side==side then --found me
-         found_me = true
-         break
-      elseif board[i][j].side!=side then --found you
-         found_you = true
-      end
-      i += 1
-      j -= 1
-   end
-   if found_me and found_you then
-      directions[#directions+1] = "ru"
-   end
+	--check right/down diagonal
+	local i = x+1
+	local j = y+1
+	while i<9 and j<9 do
+		if not board[i][j].side then --no same colored piece found
+			found_me = false
+			found_you = false
+			break
+		elseif board[i][j].side==side then --found me
+			found_me = true
+			break
+		elseif board[i][j].side!=side then --found you
+			found_you = true
+		end
+		i += 1
+		j += 1
+	end
+	if found_me and found_you then
+		directions[#directions+1] = "rd"
+	end
+	found_me = false
+	found_you = false
 
-   return directions
+	--check left/up diagonal
+	local i = x-1
+	local j = y-1
+	while i>0 and j>0 do
+		if not board[i][j].side then --no same colored piece found
+			found_me = false
+			found_you = false
+			break
+		elseif board[i][j].side==side then --found me
+			found_me = true
+			break
+		elseif board[i][j].side!=side then --found you
+			found_you = true
+		end
+		i -= 1
+		j -= 1
+	end
+	if found_me and found_you then
+		directions[#directions+1] = "lu"
+	end
+	found_me = false
+	found_you = false
+
+	--check right/up diagonal
+	local i = x+1
+	local j = y-1
+	while i<9 and j>0 do
+		if not board[i][j].side then --no same colored piece found
+			found_me = false
+			found_you = false
+			break
+		elseif board[i][j].side==side then --found me
+			found_me = true
+			break
+		elseif board[i][j].side!=side then --found you
+			found_you = true
+		end
+		i += 1
+		j -= 1
+	end
+	if found_me and found_you then
+		directions[#directions+1] = "ru"
+	end
+
+	return directions
 end
 
 function place_token(d)
-   sfx(0)
-	  free -= 1
-   board[x][y].side = side
-   flip_all_tokens(d)
-	  player = (player+1)%2
-	  side = p[player+1]
-	  x = 1
-	  y = 1
+	sfx(0)
+	free -= 1
+	board[x][y].side = side
+	flip_all_tokens(d)
+	player = (player+1)%2
+	side = p[player+1]
+	x = 1
+	y = 1
 end
 
 function flip_all_tokens(d)
@@ -371,7 +401,7 @@ function flip_all_tokens(d)
 		board[i][y].flip_prog = 1
 		board[i][y].change_to = player + 1
 		board[i][y].side = side
-		 i -= 1
+		i -= 1
 	end
 
 	--check down
@@ -388,7 +418,7 @@ function flip_all_tokens(d)
 		board[x][i].flip_prog = 1
 		board[x][i].change_to = player + 1
 		board[x][i].side = side
-		 i += 1
+		i += 1
 	end
 
 	--check up
@@ -405,7 +435,7 @@ function flip_all_tokens(d)
 		board[x][i].flip_prog = 1
 		board[x][i].change_to = player + 1
 		board[x][i].side = side
-		 i -= 1
+		i -= 1
 	end
 
 	--check left/down diagonal
@@ -423,8 +453,8 @@ function flip_all_tokens(d)
 		board[i][j].flip_prog = 1
 		board[i][j].change_to = player + 1
 		board[i][j].side = side
-		 i -= 1
-		 j += 1
+		i -= 1
+		j += 1
 	end
 
 	--check right/down diagonal
@@ -442,8 +472,8 @@ function flip_all_tokens(d)
 		board[i][j].flip_prog = 1
 		board[i][j].change_to = player + 1
 		board[i][j].side = side
-		 i += 1
-		 j += 1
+		i += 1
+		j += 1
 	end
 
 	--check left/up diagonal
@@ -461,8 +491,8 @@ function flip_all_tokens(d)
 		board[i][j].flip_prog = 1
 		board[i][j].change_to = player + 1
 		board[i][j].side = side
-		 i -= 1
-		 j -= 1
+		i -= 1
+		j -= 1
 	end
 
 	--check right/up diagonal
@@ -480,9 +510,134 @@ function flip_all_tokens(d)
 		board[i][j].flip_prog = 1
 		board[i][j].change_to = player + 1
 		board[i][j].side = side
-		 i += 1
-		 j -= 1
+		i += 1
+		j -= 1
 	end
+end
+
+function computer_max_flips(d)
+	local count = 0
+	--check right side
+	local dir = false
+	for a = 1,#d do
+		if d[a]=="r" then
+			dir = true
+			break
+		end
+	end
+	local i = x+1
+	while dir and board[i][y].side != side do
+		count += 1
+		i += 1
+	end
+
+	--check left side
+	local dir = false
+	for a = 1,#d do
+		if d[a]=="l" then
+			dir = true
+			break
+		end
+	end
+	local i = x-1
+	while dir and board[i][y].side != side do
+		count += 1
+		i -= 1
+	end
+
+	--check down
+	local dir = false
+	for a = 1,#d do
+		if d[a]=="d" then
+			dir = true
+			break
+		end
+	end
+	local i = y+1
+	while dir and board[x][i].side != side do
+		count += 1
+		i += 1
+	end
+
+	--check up
+	local dir = false
+	for a = 1,#d do
+		if d[a]=="u" then
+			dir = true
+			break
+		end
+	end
+	local i = y-1
+	while dir and board[x][i].side != side do
+		count += 1
+		i -= 1
+	end
+
+	--check left/down diagonal
+	local dir = false
+	for a = 1,#d do
+		if d[a]=="ld" then
+			dir = true
+			break
+		end
+	end
+	local i = x-1
+	local j = y+1
+	while dir and board[i][j].side != side do
+		count += 1
+		i -= 1
+		j += 1
+	end
+
+	--check right/down diagonal
+	local dir = false
+	for a = 1,#d do
+		if d[a]=="rd" then
+			dir = true
+			break
+		end
+	end
+	local i = x+1
+	local j = y+1
+	while dir and board[i][j].side != side do
+		count += 1
+		i += 1
+		j += 1
+	end
+
+	--check left/up diagonal
+	local dir = false
+	for a = 1,#d do
+		if d[a]=="lu" then
+			dir = true
+			break
+		end
+	end
+	local i = x-1
+	local j = y-1
+	while dir and board[i][j].side != side do
+		count += 1
+		i -= 1
+		j -= 1
+	end
+
+	--check right/up diagonal
+	local dir = false
+	for a = 1,#d do
+		if d[a]=="ru" then
+			dir = true
+			break
+		end
+	end
+	local i = x+1
+	local j = y-1
+	while dir and board[i][j].side != side do
+		count += 1
+		i += 1
+		j -= 1
+	end
+
+	return count
 end
 
 function flip_timer()
@@ -522,32 +677,32 @@ end
 --game ends when no more spaces are left or
 --when both players have no more valid moves
 function game_is_over()
-   --any more spaces?
-   if free==0 then
-		 return true
-	 end
-	 --any more valid moves?
-	 no_valid = 0
-	 for i=1,8 do
-		 for j=1,8 do
-			 if #get_dir(i,j)>0 then
-				 no_valid = false
-			 end
-		 end
-	 end
-	 if no_valid then
-		 player = (player+1)%2
-		 side = p[player+1]
-		 for i=1,8 do
-			 for j=1,8 do
-				 if #get_dir(i,j)>0 then
-					 no_valid = false
-					 break
-				 end
-			 end
-		 end
-	 end
-	 return no_valid
+	--any more spaces?
+	if free==0 then
+		return true
+	end
+	--any more valid moves?
+	no_valid = 0
+	for i=1,8 do
+		for j=1,8 do
+			if #get_dir(i,j)>0 then
+				no_valid = false
+			end
+		end
+	end
+	if no_valid then
+		player = (player+1)%2
+		side = p[player+1]
+		for i=1,8 do
+			for j=1,8 do
+				if #get_dir(i,j)>0 then
+					no_valid = false
+					break
+				end
+			end
+		end
+	end
+	return no_valid
 end
 
 function game_over()
