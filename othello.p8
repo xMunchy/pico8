@@ -198,14 +198,31 @@ function _draw()
 		--display board
 		show_tokens()
 		if winner == 1 then --player 1
-			sspr(72,16,40,8,24,70,80,16) --winner text
+			sspr(72,16,40,8,26,70,80,16) --winner text
 			sspr(56,0,16,16,32,10,64,64)
 		elseif winner == 2 then --player 2
-			sspr(72,16,40,8,24,70,80,16) --winner text
+			sspr(72,16,40,8,26,70,80,16) --winner text
 			sspr(72,0,16,16,32,10,64,64)
 		else --tie
 			sspr(88,0,16,16,32,40,64,64)
 		end
+		--display token count
+		local p1_count = 0
+		local p2_count = 0
+		for x=1,8 do
+		 for y=1,8 do
+		  if board[x][y].side and board[x][y].side==p[1] then
+ 		  p1_count += 1		  
+		  elseif board[x][y].side and board[x][y].side==p[2] then
+		   p2_count += 1
+		  end
+		 end
+		end
+		rectfill(24,90,104,102,12)
+		spr(p[1],24,88,2,2)
+		spr(p[2],74,88,2,2)
+		print("x"..p1_count,42,94,7)
+		print("x"..p2_count,92,94,7)
 	end
 end
 
@@ -782,11 +799,11 @@ __gfx__
 00000000333b333333ccc333fffffff77777fffffffffff00000ffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000
 0000000033333333333c3333ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000
 000000003333333333333333ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000
-00000000333333333333333333333333333333333333333333333333fcccccfffeeeeeffcfffffcfcccccfccffffcfccffffcfcccfcccccf0000000000000000
-00000000333333333333333333333333333333333333333333333333cc7c7ccfee7e7eefcfffffcfffcfffcfcfffcfcfcfffcfcfffcfffcf0000000000000000
-00000000333333333333a33333333333333333333333333333333333ccc7cccfeee7eeefcfffffcfffcfffcffcffcfcffcffcfcfffcfffcf0000000000000000
-00000000333b3333333aaa3333333333333333333333333333333333cc7c7ccfee7e7eefcffcffcfffcfffcffcffcfcffcffcfcccfcccccf0000000000000000
-00000000333333333333a33333333333333b3333333333d333333333fcccccfffeeeeeffcffcffcfffcfffcffcffcfcffcffcfcfffcffcff0000000000000000
+00000000333333333333333333333333333333333333333333333333fcccccfff88888ffcfffffcfcccccfccffffcfccffffcfcccfcccccf0000000000000000
+00000000333333333333333333333333333333333333333333333333cc7c7ccf8878788fcfffffcfffcfffcfcfffcfcfcfffcfcfffcfffcf0000000000000000
+00000000333333333333a33333333333333333333333333333333333ccc7cccf8887888fcfffffcfffcfffcffcffcfcffcffcfcfffcfffcf0000000000000000
+00000000333b3333333aaa3333333333333333333333333333333333cc7c7ccf8878788fcffcffcfffcfffcffcffcfcffcffcfcccfcccccf0000000000000000
+00000000333333333333a33333333333333b3333333333d333333333fcccccfff88888ffcffcffcfffcfffcffcffcfcffcffcfcfffcffcff0000000000000000
 000000003333333333333333333333333333333333333ddd33333333ffffffffffffffffcffcffcfffcfffcffcffcfcffcffcfcfffcfffcf0000000000000000
 0000000033333333333333333333333333333333333333d333333333ffffffffffffffffcfcfcfcfffcfffcfffcfcfcfffcfcfcfffcfffcf0000000000000000
 00000000333333333333333333333333333333333333333333333333fffffffffffffffffcfffcffcccccfcffffccfcffffccfcccfcfffcf0000000000000000
