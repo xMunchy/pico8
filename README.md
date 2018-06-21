@@ -26,8 +26,8 @@ Similar to the board game Othello or Reversi. Cat and original theme available.
 ## PicoPico
 Similar to the game Battle Battle.
 #####   Rules:
-   * 
-##### Progress: 
+   *
+##### Progress:
 - [ ] Basic Gameplay
 - [ ] Sprites
 - [ ] Map
@@ -43,7 +43,7 @@ A remake of my game [Everything Dumpling](https://scratch.mit.edu/projects/12475
    * Avoid bigger dumplings
    * Eat smaller dumplings to grow
    * Reach max size to win
-##### Progress: 
+##### Progress:
 - [ ] Basic Gameplay
 - [ ] Sprites
 - [ ] Map
@@ -72,3 +72,11 @@ A game about farming.
 
 ## Pizza Delivery
 A game about delivering pizzas. Still fleshing out concept.
+
+## Memory Game
+Like follow the leader or Simon says.
+
+- [ ] Basic Gameplay
+- [ ] Title screen
+- [ ] Game over screen
+- [ ] Highscore
