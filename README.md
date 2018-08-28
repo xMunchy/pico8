@@ -17,10 +17,10 @@ Similar to the board game Othello or Reversi. Cat and original theme available.
 - [x] Sprites
 - [x] Map
 - [ ] Title page
-- [ ] Game over screen
+- [x] Game over screen
 - [x] SFX
 - [ ] Music
-- [ ] vs Computer
+- [x] vs Computer
 
 
 ## PicoPico
@@ -60,7 +60,7 @@ A game about farming.
    * Shop at a flea market for tools and items
    * Go outside town to find livestock
 #### Progress:
-- [ ] Basic crop farming
+- [x] Basic crop farming
 - [ ] Livestock
 - [ ] Flea market
 - [ ] UI (Inventory, stats, etc)
