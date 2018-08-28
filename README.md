@@ -44,8 +44,9 @@ A remake of my game [Everything Dumpling](https://scratch.mit.edu/projects/12475
    * Eat smaller dumplings to grow
    * Reach max size to win
 ##### Progress:
-- [ ] Basic Gameplay
-- [ ] Sprites
+- [ ] Eat
+- [ ] Grow
+- [ ] Different sized enemies
 - [ ] Map
 - [ ] Title screen
 - [ ] Game over screen
