@@ -2,13 +2,185 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 function _init()
+   palt(0,false) --turn off black transparency
+   palt(12,true) --turn on blue transparency
 
+   --player
+   player = {}
+   player.x = 64
+   player.y = 64
+   player.sprite = 1 --current sprite
+   player.left = false
+   --size in pixels
+   player.width = 8
+   player.height = 6
+   player.size = 1
+   --sprite ids
+   player.norm_spr = 1
+   player.eat_spr = 2
+   --values
+   player.speed = 0.5
+   
+   --enemy
+   enemy = {} --list of enemies
+   enemy.num_types = 1
+   enemy.sprite = {3} --sprite ids
+   enemy.onscreen_lim = 5
+   spawn_timer = time()
 end
 
 function _update60()
-
+   player_move()
+   can_eat()
+   enemy_move()
+   enemy_spawn()
 end
 
 function _draw()
+   cls(12)
+   draw_player()
+   draw_enemies()
+end
+-->8
+function player_move()
+   if btn(0) then --go left
+      player.x -= player.speed
+      player.left = true
+   end
+   if btn(1) then --go right
+      player.x += player.speed
+      player.left = false
+   end
+   
+   if btn(2) then --go up
+      player.y -= player.speed
+   end
+   
+   if btn(3) then --go down
+      player.y += player.speed
+   end
+end
+
+--checks collision with enemies
+--if player is touching an enemy, eat it
+-- x1,y1  x2,y1
+-- x1,y2  x2,y2
+function can_eat()
+   local x1 = player.x
+   local y1 = player.y
+   local x2 = x1 + player.width
+   local y2 = y1 + player.height
+   
+   for i = 1,#enemy do
+      --enemy collision box
+      -- a1,b1  a2,b1
+      -- a1,b2  a2,b2
+      local a1 = enemy[i].x
+      local b1 = enemy[i].y
+      local a2 = a1 + enemy[i].width
+      local b2 = b1 + enemy[i].height
+
+      if check_collision(x1,x2,y1,y2,a1,a2,b1,b2) then
+         eat(i)
+      elseif check_collision(a1,a2,b1,b2,x1,x2,y1,y2) then
+         eat(i)
+      end
+   end
+end
+
+--eat enemy[i]
+--grows player, resets enemy[i]
+function eat(i)
 
 end
+
+function enemy_move()
+
+end
+
+function enemy_spawn()
+
+end
+
+function check_collision(x1,x2,y1,y2,a1,a2,b1,b2)
+
+end
+
+--creates an enemy with new:
+--position,type,size
+function make_enemy(i)
+
+end
+-->8
+function draw_player()
+   spr(player.sprite,player.x,player.y,1,1,player.left)
+end
+
+function draw_enemies()
+
+end
+__gfx__
+00000000cc4fffcccc4fffccc77ccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000c4fffffcc4fffffc7777cccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+007007004ff0ff0f4ff0ff0f7777cccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+000770004fffffff4fffffffc77ccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+000770004fffffff4fff88ffcccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00700700c444444cc4fffffccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccc44444ccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
+00000000cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc00000000000000000000000000000000000000000000000000000000
