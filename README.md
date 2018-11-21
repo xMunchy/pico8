@@ -16,7 +16,7 @@ Similar to the board game Othello or Reversi. Cat and original theme available.
 - [x] Basic Gameplay
 - [x] Sprites
 - [x] Map
-- [ ] Title page
+- [x] Title page
 - [x] Game over screen
 - [x] SFX
 - [ ] Music
@@ -81,3 +81,24 @@ Like follow the leader or Simon says.
 - [ ] Title screen
 - [ ] Game over screen
 - [ ] Highscore
+
+
+## Minesweeper
+Board is centered on screen.
+##### Progress:
+- [x] Board creation (mines, number values)
+- [x] Cursor movement
+- [x] Reveal Tiles
+- [x] Place and unplace flags
+- [x] Losing scenario (explosions originating from losing bomb!)
+- [x] Winning scenario (waving flags!)
+- [x] Animations (flags, bombs, pressing tiles)
+- [ ] Title page
+- [ ] Customizable sizes/num mines
+- [ ] Zooming
+- [ ] Panning
+- [ ] Losing screen
+- [ ] Winning screen
+- [x] SFX (move, press, fail press)
+- [ ] SFX (explosions)
+- [ ] Music (winning, losing, title, playing)
